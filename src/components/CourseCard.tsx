@@ -19,9 +19,10 @@ interface Course {
 
 interface CourseCardProps {
   course: Course;
+  onContinueCourse?: (course: Course) => void;
 }
 
-const CourseCard: FC<CourseCardProps> = ({ course }) => {
+const CourseCard: FC<CourseCardProps> = ({ course, onContinueCourse }) => {
   return (
     <div className="course-card-rectangular">
       <div className="course-image">
@@ -69,7 +70,10 @@ const CourseCard: FC<CourseCardProps> = ({ course }) => {
       </div>
       
       <div className="course-actions">
-        <button className="btn-continue">
+        <button 
+          className="btn-continue"
+          onClick={() => onContinueCourse?.(course)}
+        >
           <Play size={16} />
           Tiếp tục học
         </button>

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { 
   BookOpen, 
   Calendar, 
@@ -12,6 +12,7 @@ import './ICANDashboard.css';
 import UpcomingClassNotification from '../components/UpcomingClassNotification';
 import CourseCard from '../components/CourseCard';
 import CalendarView from '../components/CalendarView';
+import CourseDetailView from '../components/CourseDetailView';
 
 interface ICANDashboardProps {
   onBack?: () => void;
@@ -26,6 +27,23 @@ interface ICANDashboardNavProps extends ICANDashboardProps {
 }
 
 const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOpenCourses, onOpenReports, onOpenMessages, onOpenSettings }) => {
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [showCourseDetail, setShowCourseDetail] = useState(false);
+
+  const handleContinueCourse = (course: any) => {
+    setSelectedCourse(course);
+    setShowCourseDetail(true);
+  };
+
+  const handleBackToDashboard = () => {
+    setShowCourseDetail(false);
+    setSelectedCourse(null);
+  };
+
+  const handleStartLesson = (course: any) => {
+    console.log('Starting lesson for course:', course.title);
+    // Here you would typically navigate to the lesson or open a video player
+  };
   const courses = [
     {
       id: 1,
@@ -150,7 +168,15 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
           </div>
         </header>
 
-        {/* Upcoming Class Notification */}
+        {showCourseDetail && selectedCourse ? (
+          <CourseDetailView
+            course={selectedCourse}
+            onBack={handleBackToDashboard}
+            onStartLesson={handleStartLesson}
+          />
+        ) : (
+          <>
+            {/* Upcoming Class Notification */}
         <UpcomingClassNotification
           className="Tiếng Anh Giao Tiếp Cơ Bản"
           instructor="Cô Sarah Johnson"
@@ -172,7 +198,11 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
             </div>
             <div className="courses-list">
               {courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onContinueCourse={handleContinueCourse}
+                />
               ))}
             </div>
           </div>
@@ -233,6 +263,8 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
 
         {/* Calendar on Dashboard */}
         <CalendarView onOpenSchedule={onOpenSchedule} />
+      </>
+        )}
       </div>
     </div>
   );

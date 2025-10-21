@@ -16,6 +16,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import './ICANCourses.css';
+import CourseDetailView from '../components/CourseDetailView';
 
 interface ICANCoursesProps {
   onBack?: () => void;
@@ -31,29 +32,48 @@ interface Course {
   title: string;
   subtitle: string;
   description: string;
-  instructor: string;
-  rating: number;
-  students: number;
-  duration: string;
-  price: string;
+  instructor?: string;
+  rating?: number;
+  students?: number;
+  duration?: string;
+  price?: string;
   progress: number;
   totalLessons: number;
   completedLessons: number;
   nextLesson: string;
   color: string;
   imageUrl: string;
-  category: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
-  tags: string[];
-  isEnrolled: boolean;
-  startDate: string;
-  endDate: string;
+  category?: string;
+  level?: 'Beginner' | 'Intermediate' | 'Advanced';
+  tags?: string[];
+  isEnrolled?: boolean;
+  startDate?: string;
+  endDate?: string;
+  targetAudience: string;
+  benefits: string;
 }
 
 const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSchedule, onOpenReports, onOpenMessages, onOpenSettings }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [showCourseDetail, setShowCourseDetail] = useState(false);
+
+  const handleContinueCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setShowCourseDetail(true);
+  };
+
+  const handleBackToCourses = () => {
+    setShowCourseDetail(false);
+    setSelectedCourse(null);
+  };
+
+  const handleStartLesson = (course: Course) => {
+    console.log('Starting lesson for course:', course.title);
+    // Here you would typically navigate to the lesson or open a video player
+  };
 
   const categories = [
     { id: 'all', name: 'Tất cả khóa học', count: 6 },
@@ -84,7 +104,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['Tiếng Anh trẻ em', 'Giao tiếp', '1:1 với giáo viên'],
       isEnrolled: true,
       startDate: '2025-01-15',
-      endDate: '2025-04-15'
+      endDate: '2025-04-15',
+      targetAudience: 'Học viên từ 7 - 12 tuổi',
+      benefits: 'Mô hình học 1:1 hoặc 1:2 trực tiếp với giáo viên'
     },
     {
       id: 2,
@@ -107,7 +129,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['Ngữ pháp', 'Tự học tại nhà', 'Trẻ em'],
       isEnrolled: true,
       startDate: '2025-01-20',
-      endDate: '2025-07-20'
+      endDate: '2025-07-20',
+      targetAudience: 'Học viên từ 5 - 11 tuổi',
+      benefits: 'Tăng khả năng sử dụng ngôn ngữ thông qua việc luyện tập'
     },
     {
       id: 3,
@@ -130,7 +154,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['Tiếng Anh thiếu niên', 'Giao tiếp', 'Kỳ thi quốc tế'],
       isEnrolled: true,
       startDate: '2025-01-10',
-      endDate: '2025-05-10'
+      endDate: '2025-05-10',
+      targetAudience: 'Học viên từ 13 - 17 tuổi',
+      benefits: 'Phát triển kỹ năng giao tiếp tự tin và hiệu quả'
     },
     {
       id: 4,
@@ -153,7 +179,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['IELTS', 'Cam kết đầu ra', 'Phương pháp LIPE'],
       isEnrolled: false,
       startDate: '2025-02-01',
-      endDate: '2025-08-01'
+      endDate: '2025-08-01',
+      targetAudience: 'Học viên từ 13 - 17 tuổi',
+      benefits: 'Chuẩn bị tốt nhất cho kỳ thi IELTS'
     },
     {
       id: 5,
@@ -176,7 +204,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['Tiếng Anh người lớn', 'Giao tiếp', 'Công việc'],
       isEnrolled: false,
       startDate: '2025-03-01',
-      endDate: '2025-06-01'
+      endDate: '2025-06-01',
+      targetAudience: 'Học viên từ 18 tuổi trở lên',
+      benefits: 'Cải thiện kỹ năng giao tiếp tiếng Anh trong công việc'
     },
     {
       id: 6,
@@ -199,15 +229,17 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       tags: ['IELTS Foundation', 'Nền tảng', 'Người mới bắt đầu'],
       isEnrolled: false,
       startDate: '2025-02-15',
-      endDate: '2025-06-15'
+      endDate: '2025-06-15',
+      targetAudience: 'Học viên từ 18 tuổi trở lên',
+      benefits: 'Đạt điểm IELTS mong muốn trong thời gian ngắn'
     }
   ];
 
   const filteredCourses = courses.filter(course => {
     const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      (course.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      (course.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) || false);
     return matchesCategory && matchesSearch;
   });
 
@@ -258,8 +290,16 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
 
       {/* Main Content */}
       <div className="main-content">
-        {/* Header */}
-        <header className="courses-header">
+        {showCourseDetail && selectedCourse ? (
+          <CourseDetailView
+            course={selectedCourse}
+            onBack={handleBackToCourses}
+            onStartLesson={handleStartLesson}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <header className="courses-header">
           <div className="header-left">
             <h1>Khóa học của tôi</h1>
             <p>Quản lý và theo dõi tiến độ học tập</p>
@@ -431,11 +471,14 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                       </div>
 
                       <div className="course-actions">
-                        <button className="btn-continue" style={{ backgroundColor: course.color }}>
+                        <button 
+                          className="btn-continue" 
+                          style={{ backgroundColor: course.color }}
+                          onClick={() => handleContinueCourse(course)}
+                        >
                           <Play size={16} />
                           Tiếp tục học
                         </button>
-
                       </div>
                     </div>
                   ))}
@@ -485,7 +528,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                         </div>
 
                         <div className="course-tags">
-                          {course.tags.map((tag, index) => (
+                          {course.tags?.map((tag, index) => (
                             <span key={index} className="tag">{tag}</span>
                           ))}
                         </div>
@@ -518,6 +561,8 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
             )}
           </div>
         </div>
+      </>
+        )}
       </div>
     </div>
   );
