@@ -1,21 +1,18 @@
 import { FC, useState } from 'react';
-import { 
-  BookOpen, 
-  Calendar, 
-  Bell, 
+import {
+  BookOpen,
+  Calendar,
+  Bell,
   Settings,
   Home,
   MessageCircle,
   BarChart3,
   Search,
-  Filter,
   Star,
   Clock,
   Users,
   Play,
-  ChevronRight,
   Award,
-  Target,
   TrendingUp
 } from 'lucide-react';
 import './ICANCourses.css';
@@ -127,7 +124,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       completedLessons: 11,
       nextLesson: 'Bài 12: Thuyết trình',
       color: '#DB2691',
-       imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_easy_pass_6f72975b0e.png&w=1920&q=75',
+      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_easy_pass_6f72975b0e.png&w=1920&q=75',
       category: 'easy-speak-teens',
       level: 'Intermediate',
       tags: ['Tiếng Anh thiếu niên', 'Giao tiếp', 'Kỳ thi quốc tế'],
@@ -150,7 +147,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       completedLessons: 0,
       nextLesson: 'Bài 1: Giới thiệu IELTS',
       color: '#F59E0B',
-       imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_easy_ielts_727e1a6281.png&w=1920&q=75',
+      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_easy_ielts_727e1a6281.png&w=1920&q=75',
       category: 'easy-ielts',
       level: 'Advanced',
       tags: ['IELTS', 'Cam kết đầu ra', 'Phương pháp LIPE'],
@@ -173,7 +170,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       completedLessons: 0,
       nextLesson: 'Bài 1: Giới thiệu khóa học',
       color: '#0057A5',
-       imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_adult_easy_speak_903d04821e.png&w=1920&q=75',
+      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_adult_easy_speak_903d04821e.png&w=1920&q=75',
       category: 'speakwell',
       level: 'Advanced',
       tags: ['Tiếng Anh người lớn', 'Giao tiếp', 'Công việc'],
@@ -196,7 +193,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       completedLessons: 0,
       nextLesson: 'Bài 1: Giới thiệu IELTS Foundation',
       color: '#06B6D4',
-       imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_public_speaking_15b6909efc.png&w=1920&q=75',
+      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_youth_public_speaking_15b6909efc.png&w=1920&q=75',
       category: 'easy-ielts',
       level: 'Beginner',
       tags: ['IELTS Foundation', 'Nền tảng', 'Người mới bắt đầu'],
@@ -209,8 +206,8 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
   const filteredCourses = courses.filter(course => {
     const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -223,14 +220,14 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="logo">
-            <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/f/ff/ICAN_logo.png" 
-              alt="ICAN Logo" 
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/f/ff/ICAN_logo.png"
+              alt="ICAN Logo"
               className="sidebar-logo-img"
             />
           </div>
         </div>
-        
+
         <nav className="sidebar-nav">
           <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onOpenDashboard?.(); }}>
             <Home size={20} />
@@ -330,9 +327,9 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
             <div className="search-section">
               <div className="search-box">
                 <Search size={20} />
-                <input 
-                  type="text" 
-                  placeholder="Tìm kiếm khóa học..." 
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm khóa học..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -358,14 +355,14 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
             <div className="view-controls">
               <h3>Chế độ xem</h3>
               <div className="view-toggle">
-                <button 
+                <button
                   className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
                   onClick={() => setViewMode('grid')}
                 >
                   <div className="grid-icon"></div>
                   Lưới
                 </button>
-                <button 
+                <button
                   className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
                   onClick={() => setViewMode('list')}
                 >
@@ -392,13 +389,13 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                         <img src={course.imageUrl} alt={course.title} />
                         <div className="course-badge enrolled">Đang học</div>
                       </div>
-                      
+
                       <div className="course-content">
                         <div className="course-header">
                           <h3 className="course-title">{course.title}</h3>
                           <p className="course-subtitle">{course.subtitle}</p>
                         </div>
-                        
+
                         <div className="course-meta">
                           <div className="meta-item">
                             <Users size={14} />
@@ -413,32 +410,32 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                             <span>{course.duration}</span>
                           </div>
                         </div>
-                        
+
                         <div className="course-progress">
                           <div className="progress-info">
                             <span className="progress-text">{course.progress}% hoàn thành</span>
                             <span className="lessons-text">{course.completedLessons}/{course.totalLessons} bài học</span>
                           </div>
                           <div className="progress-bar">
-                            <div 
-                              className="progress-fill" 
+                            <div
+                              className="progress-fill"
                               style={{ width: `${course.progress}%`, backgroundColor: course.color }}
                             ></div>
                           </div>
                         </div>
-                        
+
                         <div className="next-lesson">
                           <Clock size={16} />
                           <span>Tiếp theo: {course.nextLesson}</span>
                         </div>
                       </div>
-                      
+
                       <div className="course-actions">
                         <button className="btn-continue" style={{ backgroundColor: course.color }}>
                           <Play size={16} />
                           Tiếp tục học
                         </button>
-                      
+
                       </div>
                     </div>
                   ))}
@@ -461,13 +458,13 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                         <div className="course-badge available">Có sẵn</div>
                         <div className="course-price">{course.price}</div>
                       </div>
-                      
+
                       <div className="course-content">
                         <div className="course-header">
                           <h3 className="course-title">{course.title}</h3>
                           <p className="course-subtitle">{course.subtitle}</p>
                         </div>
-                        
+
                         <div className="course-meta">
                           <div className="meta-item">
                             <Users size={14} />
@@ -482,18 +479,18 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
                             <span>{course.duration}</span>
                           </div>
                         </div>
-                        
+
                         <div className="course-description">
                           <p>{course.description}</p>
                         </div>
-                        
+
                         <div className="course-tags">
                           {course.tags.map((tag, index) => (
                             <span key={index} className="tag">{tag}</span>
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="course-actions">
                         <button className="btn-enroll" style={{ backgroundColor: course.color }}>
                           Đăng ký ngay

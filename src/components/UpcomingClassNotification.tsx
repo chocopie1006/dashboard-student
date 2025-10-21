@@ -6,7 +6,6 @@ interface UpcomingClassNotificationProps {
   className?: string;
   instructor?: string;
   startTime?: string;
-  endTime?: string;
   date?: string;
   onJoinClass?: () => void;
 }
@@ -15,7 +14,6 @@ const UpcomingClassNotification: FC<UpcomingClassNotificationProps> = ({
   className = "Tiếng Anh Giao Tiếp Cơ Bản",
   instructor = "Cô Sarah Johnson",
   startTime = "10:30",
-  endTime = "11:30",
   date = "21 thg 10 năm 2025",
   onJoinClass
 }) => {

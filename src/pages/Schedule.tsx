@@ -5,7 +5,7 @@ interface ScheduleProps {
   onBack?: () => void;
 }
 
-const Schedule: FC<ScheduleProps> = ({ onBack }) => {
+const Schedule: FC<ScheduleProps> = () => {
   const today = new Date();
   const currentWeek = getWeekDates(today);
 
