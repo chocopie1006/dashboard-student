@@ -13,7 +13,14 @@ import {
   Users,
   Play,
   Award,
-  TrendingUp
+  TrendingUp,
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  Video,
+  XCircle,
+  CalendarClock,
+  Route
 } from 'lucide-react';
 import './ICANCourses.css';
 import CourseDetailView from '../components/CourseDetailView';
@@ -54,16 +61,21 @@ interface Course {
 }
 
 const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSchedule, onOpenReports, onOpenMessages, onOpenSettings }) => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['root']));
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showCourseDetail, setShowCourseDetail] = useState(false);
+  const [classTab, setClassTab] = useState<'all' | '1-1' | '1-n' | 'trial'>('all');
+  const [statusTab, setStatusTab] = useState<'all' | 'scheduled' | 'unscheduled' | 'completed' | 'cancelled'>('all');
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
+  const [serviceType, setServiceType] = useState<'all' | 'online' | 'offline'>('all');
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(5);
 
-  const handleContinueCourse = (course: Course) => {
-    setSelectedCourse(course);
-    setShowCourseDetail(true);
-  };
+  // Note: course detail flow retained for available courses if needed
 
   const handleBackToCourses = () => {
     setShowCourseDetail(false);
@@ -75,12 +87,79 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
     // Here you would typically navigate to the lesson or open a video player
   };
 
-  const categories = [
-    { id: 'all', name: 'Tất cả khóa học', count: 6 },
-    { id: 'speakwell', name: 'SpeakWell', count: 2 },
-    { id: 'easy-speak-teens', name: 'Easy Speak For Teens', count: 2 },
-    { id: 'easy-ielts', name: 'Easy IELTS', count: 2 }
+  // Tree category structure requested
+  const treeCategories = [
+    {
+      id: 'speakwell-getready',
+      name: 'Speawell Get ready',
+      children: [
+        { id: 'kb-starters', name: "Kid's Box Starters" },
+        { id: 'kb-movers', name: "Kid's Box Movers" },
+        { id: 'kb-flyers', name: "Kid's Box Fylers" }
+      ]
+    },
+    {
+      id: 'speakwell-hero',
+      name: 'Speakwell Hero',
+      children: [
+        { id: 'letsgo-1', name: "Let's go 1" },
+        { id: 'letsgo-2', name: "Let's go 2" },
+        { id: 'kb-beginners', name: "Kid's Box Beginners" }
+      ]
+    },
+    {
+      id: 'speakwell-teens',
+      name: 'Speakwell For Teens',
+      children: [
+        { id: 'solution-elementary', name: 'Solution Elementary' },
+        { id: 'solution-pre', name: 'Solution Pre-Intermediate' }
+      ]
+    }
   ];
+
+  // Map leaf nodes to course.category used in sample data
+  const leafIdToCourseCategory: Record<string, string> = {
+    'kb-starters': 'speakwell',
+    'kb-movers': 'speakwell',
+    'kb-flyers': 'speakwell',
+    'letsgo-1': 'speakwell',
+    'letsgo-2': 'speakwell',
+    'kb-beginners': 'speakwell',
+    'solution-elementary': 'easy-speak-teens',
+    'solution-pre': 'easy-speak-teens'
+  };
+
+  const getDescendantLeafIds = (nodeId: string): string[] => {
+    const stack: any[] = [...treeCategories];
+    const leaves: string[] = [];
+    while (stack.length) {
+      const n = stack.pop();
+      if (!n) continue;
+      if (n.id === nodeId) {
+        // Collect leaves in this subtree
+        const collect = (m: any) => {
+          if (m.children?.length) m.children.forEach(collect);
+          else leaves.push(m.id);
+        };
+        collect(n);
+        return leaves;
+      }
+      if (n.children?.length) stack.push(...n.children);
+    }
+    return leaves;
+  };
+
+  const selectedCourseCategories: string[] = (() => {
+    if (selectedCategory === 'all') return [];
+    // If a leaf id is selected
+    if (leafIdToCourseCategory[selectedCategory]) {
+      return [leafIdToCourseCategory[selectedCategory]];
+    }
+    // Parent selected → include all mapped child categories
+    const leafIds = getDescendantLeafIds(selectedCategory);
+    const mapped = Array.from(new Set(leafIds.map(id => leafIdToCourseCategory[id]).filter(Boolean)));
+    return mapped;
+  })();
 
   const courses: Course[] = [
     {
@@ -236,15 +315,70 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
   ];
 
   const filteredCourses = courses.filter(course => {
-    const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || selectedCourseCategories.includes(course.category || '');
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (course.instructor?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
       (course.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) || false);
     return matchesCategory && matchesSearch;
   });
 
-  const enrolledCourses = courses.filter(course => course.isEnrolled);
-  const availableCourses = courses.filter(course => !course.isEnrolled);
+  const enrolledCourses = filteredCourses.filter(course => course.isEnrolled);
+  const availableCourses = filteredCourses.filter(course => !course.isEnrolled);
+
+  const toggleExpand = (id: string) => {
+    const next = new Set(expandedNodes);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setExpandedNodes(next);
+  };
+
+  const renderTree = (nodes: any[]) => (
+    <ul className="tree-list">
+      {nodes.map(node => (
+        <li key={node.id} className="tree-item">
+          <div className={`tree-row ${selectedCategory === node.id ? 'active' : ''}`}>
+            {node.children?.length ? (
+              <button className={`tree-toggle ${expandedNodes.has(node.id) ? 'expanded' : ''}`} onClick={() => toggleExpand(node.id)} aria-label="Toggle">
+                {expandedNodes.has(node.id) ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </button>
+            ) : (
+              <span className="tree-spacer"></span>
+            )}
+            <button
+              className="tree-label"
+              onClick={() => setSelectedCategory(node.id)}
+            >
+              <span className="tree-icon">{node.children?.length ? <Folder size={14} /> : <BookOpen size={14} />}</span>
+              <span className="tree-text">{node.name}</span>
+              <span className="count-badge">{getNodeCount(node)}</span>
+            </button>
+          </div>
+          {node.children?.length && expandedNodes.has(node.id) && (
+            <div className="tree-children">
+              {renderTree(node.children)}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+
+  function getNodeCount(node: any): number {
+    if (!node.children?.length) {
+      const mapped = leafIdToCourseCategory[node.id];
+      return courses.filter(c => c.category === mapped).length;
+    }
+    return node.children.reduce((sum: number, child: any) => sum + getNodeCount(child), 0);
+  }
+
+  function statusLabel(s: 'scheduled' | 'unscheduled' | 'completed' | 'cancelled'): string {
+    switch (s) {
+      case 'scheduled': return 'Đã lên lịch';
+      case 'unscheduled': return 'Chưa lên lịch';
+      case 'completed': return 'Hoàn thành';
+      case 'cancelled': return 'Đã hủy';
+      default: return '';
+    }
+  }
 
   return (
     <div className="ican-courses">
@@ -267,7 +401,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
           </a>
           <a href="#" className="nav-item active">
             <BookOpen size={20} />
-            <span>Khóa học</span>
+            <span>Lớp học</span>
           </a>
           <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onOpenSchedule?.(); }}>
             <Calendar size={20} />
@@ -301,7 +435,7 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
             {/* Header */}
             <header className="courses-header">
           <div className="header-left">
-            <h1>Khóa học của tôi</h1>
+            <h1>Lớp học của tôi</h1>
             <p>Quản lý và theo dõi tiến độ học tập</p>
           </div>
           <div className="header-right">
@@ -378,17 +512,14 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
 
             <div className="categories-section">
               <h3>Danh mục khóa học</h3>
-              <div className="categories-list">
-                {categories.map(category => (
-                  <button
-                    key={category.id}
-                    className={`category-item ${selectedCategory === category.id ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    <span className="category-name">{category.name}</span>
-                    <span className="category-count">{category.count}</span>
-                  </button>
-                ))}
+              <div className="tree-filter">
+                <button
+                  className={`category-reset ${selectedCategory === 'all' ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory('all')}
+                >
+                  Tất cả khóa học
+                </button>
+                {renderTree(treeCategories)}
               </div>
             </div>
 
@@ -415,76 +546,168 @@ const ICANCourses: FC<ICANCoursesProps> = ({ onBack, onOpenDashboard, onOpenSche
 
           {/* Courses List */}
           <div className="courses-main">
-            {/* Enrolled Courses */}
-            {enrolledCourses.length > 0 && (
-              <div className="courses-section">
-                <div className="section-header">
-                  <h2>Khóa học đang học</h2>
-                  <span className="course-count">{enrolledCourses.length} khóa học</span>
-                </div>
-                <div className={`courses-grid ${viewMode}`}>
-                  {enrolledCourses.map(course => (
-                    <div key={course.id} className="course-card">
-                      <div className="course-image">
-                        <img src={course.imageUrl} alt={course.title} />
-                        <div className="course-badge enrolled">Đang học</div>
+            {/* My Sessions (replace enrolled courses grid) */}
+            {enrolledCourses.length > 0 && (() => {
+              const mySessions = enrolledCourses.flatMap((course, idx) => {
+                const base = new Date();
+                base.setHours(14 + (idx % 3) * 2, 0, 0, 0);
+                const s1 = new Date(base);
+                const s2 = new Date(base.getTime() + 2 * 60 * 60 * 1000);
+                const types: Array<'1-1' | '1-n' | 'trial'> = ['1-1', '1-n', 'trial'];
+                const statuses: Array<'scheduled' | 'unscheduled' | 'completed' | 'cancelled'> = ['scheduled', 'unscheduled', 'completed', 'cancelled'];
+                const typeA = types[idx % types.length];
+                const typeB = types[(idx + 1) % types.length];
+                const statusA = statuses[idx % statuses.length];
+                const statusB = statuses[(idx + 2) % statuses.length];
+                const modeA: 'online' | 'offline' = idx % 2 === 0 ? 'online' : 'offline';
+                const modeB: 'online' | 'offline' = idx % 2 === 0 ? 'offline' : 'online';
+                const teacherName = course.instructor || 'Giáo viên ICAN';
+                const teacherAvatar = `https://i.pravatar.cc/48?img=${(idx * 7) % 70 + 1}`;
+                return [
+                  { id: `${course.id}-a`, start: s1, title: course.nextLesson, courseTitle: course.title, teacher: teacherName, teacherAvatar, color: course.color, classType: typeA, status: statusA, mode: modeA },
+                  { id: `${course.id}-b`, start: s2, title: `Ôn tập: ${course.nextLesson}`, courseTitle: course.title, teacher: teacherName, teacherAvatar, color: course.color, classType: typeB, status: statusB, mode: modeB }
+                ];
+              });
+              const matchesClass = (t: string) => classTab === 'all' || t === classTab;
+              const matchesStatus = (s: string) => statusTab === 'all' || s === statusTab;
+              const matchesService = (m: string) => serviceType === 'all' || m === serviceType;
+              const matchesSearch = (s: any) =>
+                s.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (s.teacher || '').toLowerCase().includes(searchTerm.toLowerCase());
+              const matchesDate = (s: any) => {
+                const ts = s.start.getTime();
+                const fromOk = !dateFrom || ts >= new Date(dateFrom).setHours(0,0,0,0);
+                const toOk = !dateTo || ts <= new Date(dateTo).setHours(23,59,59,999);
+                return fromOk && toOk;
+              };
+              const mySessionsFiltered = mySessions.filter(s => matchesClass(s.classType) && matchesStatus(s.status) && matchesService(s.mode) && matchesSearch(s) && matchesDate(s));
+              const totalPages = Math.max(1, Math.ceil(mySessionsFiltered.length / pageSize));
+              const currentPage = Math.min(page, totalPages);
+              const startIdx = (currentPage - 1) * pageSize;
+              const pageItems = mySessionsFiltered.slice(startIdx, startIdx + pageSize);
+              return (
+                <div className="courses-section">
+                  <div className="section-header">
+                    <h2>Lớp học đang học</h2>
+                    <span className="course-count">{mySessionsFiltered.length} buổi</span>
+                  </div>
+                  <div className="session-filter-card card">
+                    <div className="session-filters">
+                      <div className="tabs">
+                        <button className={`tab ${classTab === 'all' ? 'active' : ''}`} onClick={() => setClassTab('all')}>Tất cả</button>
+                        <button className={`tab ${classTab === '1-1' ? 'active' : ''}`} onClick={() => setClassTab('1-1')}>Lớp 1-1</button>
+                        <button className={`tab ${classTab === '1-n' ? 'active' : ''}`} onClick={() => setClassTab('1-n')}>Lớp 1-n</button>
+                        <button className={`tab ${classTab === 'trial' ? 'active' : ''}`} onClick={() => setClassTab('trial')}>Lớp học thử</button>
                       </div>
-
-                      <div className="course-content">
-                        <div className="course-header">
-                          <h3 className="course-title">{course.title}</h3>
-                          <p className="course-subtitle">{course.subtitle}</p>
-                        </div>
-
-                        <div className="course-meta">
-                          <div className="meta-item">
-                            <Users size={14} />
-                            <span>{course.instructor}</span>
-                          </div>
-                          <div className="meta-item">
-                            <Star size={14} />
-                            <span>{course.rating}</span>
-                          </div>
-                          <div className="meta-item">
-                            <Clock size={14} />
-                            <span>{course.duration}</span>
-                          </div>
-                        </div>
-
-                        <div className="course-progress">
-                          <div className="progress-info">
-                            <span className="progress-text">{course.progress}% hoàn thành</span>
-                            <span className="lessons-text">{course.completedLessons}/{course.totalLessons} bài học</span>
-                          </div>
-                          <div className="progress-bar">
-                            <div
-                              className="progress-fill"
-                              style={{ width: `${course.progress}%`, backgroundColor: course.color }}
-                            ></div>
-                          </div>
-                        </div>
-
-                        <div className="next-lesson">
-                          <Clock size={16} />
-                          <span>Tiếp theo: {course.nextLesson}</span>
-                        </div>
-                      </div>
-
-                      <div className="course-actions">
-                        <button 
-                          className="btn-continue" 
-                          style={{ backgroundColor: course.color }}
-                          onClick={() => handleContinueCourse(course)}
-                        >
-                          <Play size={16} />
-                          Tiếp tục học
-                        </button>
+                      <div className="tabs status">
+                        <button className={`tab ${statusTab === 'all' ? 'active' : ''}`} onClick={() => setStatusTab('all')}>Tất cả trạng thái</button>
+                        <button className={`tab ${statusTab === 'scheduled' ? 'active' : ''}`} onClick={() => setStatusTab('scheduled')}>Đã lên lịch</button>
+                        <button className={`tab ${statusTab === 'unscheduled' ? 'active' : ''}`} onClick={() => setStatusTab('unscheduled')}>Chưa lên lịch</button>
+                        <button className={`tab ${statusTab === 'completed' ? 'active' : ''}`} onClick={() => setStatusTab('completed')}>Hoàn thành</button>
+                        <button className={`tab ${statusTab === 'cancelled' ? 'active' : ''}`} onClick={() => setStatusTab('cancelled')}>Đã hủy</button>
                       </div>
                     </div>
-                  ))}
+                    <div className="filter-form">
+                      <div className="form-field">
+                        <label>Từ khóa</label>
+                        <div className="search-box">
+                          <Search size={20} />
+                          <input type="text" placeholder="Nhập từ khóa" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-field">
+                        <label>Loại dịch vụ</label>
+                        <div className="select-field">
+                          <select value={serviceType} onChange={(e) => setServiceType(e.target.value as any)}>
+                            <option value="all">Chọn loại dịch vụ</option>
+                            <option value="online">Trực tuyến</option>
+                            <option value="offline">Ngoại tuyến</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-field">
+                        <label>Ngày bắt đầu</label>
+                        <div className="date-input">
+                          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-field">
+                        <label>Ngày kết thúc</label>
+                        <div className="date-input">
+                          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-actions">
+                        <button className="btn-primary" onClick={(e) => e.preventDefault()}>Tìm kiếm</button>
+                        <button className="btn-outline" onClick={() => { setSearchTerm(''); setServiceType('all'); setDateFrom(''); setDateTo(''); }}>Xóa</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="session-list-card card">
+                    <div className="session-list">
+                    {pageItems.map(s => {
+                      const dateLabel = s.start.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                      const timeLabel = s.start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+                      return (
+                        <div key={s.id} className={`session-item status-${s.status}`}>
+                          <div className="session-timebox">
+                            <div className="time">🕒 {timeLabel}</div>
+                            <div className="date">{dateLabel}</div>
+                          </div>
+                          <div className="session-content">
+                            <div className="session-header-row">
+                              <div className="session-title-block">
+                                <div className="session-title">{s.courseTitle}</div>
+                              </div>
+                              <div className="teacher-block">
+                                <img className="teacher-avatar" src={s.teacherAvatar} alt={s.teacher} />
+                                <span className="teacher-name">{s.teacher}</span>
+                              </div>
+                            </div>
+                            <div className="session-lesson">{s.title} <span className="pill">{s.classType}</span> <span className={`status-pill ${s.status}`}>{statusLabel(s.status)}</span></div>
+                            <div className="session-meta"></div>
+                          </div>
+                          <div className="session-actions">
+                            <div className="action-icons">
+                              <button className="icon-btn primary" title="Vào học">
+                                <Video size={16} />
+                              </button>
+                              <button className="icon-btn warn" title="Đổi lịch">
+                                <CalendarClock size={16} />
+                              </button>
+                              <button className="icon-btn danger" title="Hủy buổi học">
+                                <XCircle size={16} />
+                              </button>
+                              <button className="icon-btn info" title="Xem lộ trình">
+                                <Route size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    </div>
+                    <div className="pagination">
+                      <div className="pagination-left">
+                        <span>Trang {currentPage}/{totalPages}</span>
+                        <select value={pageSize} onChange={(e) => { setPage(1); setPageSize(parseInt(e.target.value, 10)); }}>
+                          <option value={5}>5 / trang</option>
+                          <option value={10}>10 / trang</option>
+                          <option value={20}>20 / trang</option>
+                        </select>
+                      </div>
+                      <div className="pagination-right">
+                        <button className="page-btn" disabled={currentPage === 1} onClick={() => setPage(1)}>{'«'}</button>
+                        <button className="page-btn" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{'‹'}</button>
+                        <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setPage(currentPage + 1)}>{'›'}</button>
+                        <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setPage(totalPages)}>{'»'}</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Available Courses */}
             {availableCourses.length > 0 && (

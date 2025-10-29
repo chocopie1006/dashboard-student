@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { 
   BookOpen, 
   Calendar, 
@@ -6,13 +6,16 @@ import {
   Settings,
   Home,
   MessageCircle,
-  BarChart3
+  BarChart3,
+  Video,
+  Users,
+  FileText
 } from 'lucide-react';
 import './ICANDashboard.css';
 import UpcomingClassNotification from '../components/UpcomingClassNotification';
-import CourseCard from '../components/CourseCard';
 import CalendarView from '../components/CalendarView';
 import CourseDetailView from '../components/CourseDetailView';
+import StudentOverview from '../components/StudentOverview';
 
 interface ICANDashboardProps {
   onBack?: () => void;
@@ -24,16 +27,14 @@ interface ICANDashboardNavProps extends ICANDashboardProps {
   onOpenReports?: () => void;
   onOpenMessages?: () => void;
   onOpenSettings?: () => void;
+  onOpenHistory?: () => void;
+  onJoinClass?: () => void;
 }
 
-const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOpenCourses, onOpenReports, onOpenMessages, onOpenSettings }) => {
+const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOpenCourses, onOpenReports, onOpenMessages, onOpenSettings, onOpenHistory, onJoinClass }) => {
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [showCourseDetail, setShowCourseDetail] = useState(false);
-
-  const handleContinueCourse = (course: any) => {
-    setSelectedCourse(course);
-    setShowCourseDetail(true);
-  };
+  const [now, setNow] = useState<Date>(new Date());
 
   const handleBackToDashboard = () => {
     setShowCourseDetail(false);
@@ -44,36 +45,36 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
     console.log('Starting lesson for course:', course.title);
     // Here you would typically navigate to the lesson or open a video player
   };
-  const courses = [
+
+  // Schedule data for today
+  const todaySchedule = [
     {
-      id: 1,
-      title: 'SpeakWell - Bé tự tin giao tiếp tiếng Anh chỉ sau 3 tháng',
-      subtitle: 'Phát triển toàn diện 4 kỹ năng Nghe - Nói - Đọc - Viết',
-      description: 'Đồng thời nuôi dưỡng đam mê học tập, giúp bé hào hứng, yêu thích tiếng Anh hơn.',
-      targetAudience: 'Học viên từ 7 - 12 tuổi',
-      benefits: 'Mô hình học 1:1 hoặc 1:2 trực tiếp với giáo viên',
-      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_kid_speak_well_c9926de568.png&w=1920&q=75',
-      progress: 75,
-      totalLessons: 20,
-      completedLessons: 15,
-      nextLesson: 'Bài 16: Mua sắm',
+      id: 's1',
+      startDateTime: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
+      durationMinutes: 60,
+      lessonName: 'Speakwell Get ready -> KB Beginners -> Unit 1: Hello',
+      teacher: { name: 'Đỗ Diệu Linh', avatar: 'https://i.pravatar.cc/64?img=47' },
+      classType: '1-1',
+      meetingLink: '#',
       color: '#0057A5'
     },
     {
-      id: 2,
-      title: 'English Adventure with Milo - Tiếp thu dễ dàng, vững vàng nền tảng',
-      subtitle: 'Tạo dựng và bổ trợ nền tảng Ngữ pháp cho trẻ',
-      description: 'Đặt nền móng vững chắc để trẻ phát triển ở các trình độ cao hơn.',
-      targetAudience: 'Học viên từ 5 - 11 tuổi',
-      benefits: 'Chương trình tự học tại nhà',
-      imageUrl: 'https://www.icanconnect.vn/_next/image?url=https%3A%2F%2Fs3.icankid.io%3A443%2Fmedia%2Fweb%2Fican-connect%2Fimage_kid_english_ab7ad07ae4.png&w=1920&q=75',
-      progress: 60,
-      totalLessons: 30,
-      completedLessons: 18,
-      nextLesson: 'Bài 19: Async/Await',
+      id: 's2',
+      startDateTime: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
+      durationMinutes: 90,
+      lessonName: 'Tiếng Anh > Giao tiếp > Mua sắm',
+      teacher: { name: 'Cô Sarah Johnson', avatar: 'https://i.pravatar.cc/64?img=32' },
+      classType: '1-n',
+      meetingLink: '#',
       color: '#8CC63F'
     }
   ];
+
+  // Tick every second for countdowns
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const notifications = [
     {
@@ -133,6 +134,10 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
             <BarChart3 size={20} />
             <span>Báo cáo</span>
           </a>
+          <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onOpenHistory?.(); }}>
+            <FileText size={20} />
+            <span>Lịch sử</span>
+          </a>
           <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); onOpenMessages?.(); }}>
             <MessageCircle size={20} />
             <span>Tin nhắn</span>
@@ -188,23 +193,11 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
           }}
         />
 
-        {/* Main Grid: Courses + Upcoming + Notifications */}
+        {/* Main Grid: Overview + Upcoming + Notifications */}
         <div className="dashboard-grid">
-          {/* Courses Section */}
-          <div className="courses-section">
-            <div className="section-header">
-              <h2>Khóa học của bạn</h2>
-              <a href="#" className="view-all">Xem tất cả</a>
-            </div>
-            <div className="courses-list">
-              {courses.map((course) => (
-                <CourseCard 
-                  key={course.id} 
-                  course={course} 
-                  onContinueCourse={handleContinueCourse}
-                />
-              ))}
-            </div>
+          {/* Overview Section (replaces Courses) */}
+          <div className="overview-wrapper">
+            <StudentOverview />
           </div>
 
           {/* Notifications Section */}
@@ -237,26 +230,52 @@ const ICANDashboard: FC<ICANDashboardNavProps> = ({ onBack, onOpenSchedule, onOp
               <a href="#" className="view-all">Xem lịch</a>
             </div>
             <div className="schedule-list">
-              <div className="schedule-item">
-                <div className="schedule-time">14:00</div>
-                <div className="schedule-content">
-                  <h4>Tiếng Anh Giao Tiếp</h4>
-                  <p>Link online</p>
-                </div>
-                <button className="join-btn" style={{ backgroundColor: '#0057A5' }}>
-                  Tham gia
-                </button>
-              </div>
-              <div className="schedule-item">
-                <div className="schedule-time">16:00</div>
-                <div className="schedule-content">
-                  <h4>Lập Trình JavaScript</h4>
-                  <p>Link online</p>
-                </div>
-                <button className="join-btn" style={{ backgroundColor: '#8CC63F' }}>
-                  Tham gia
-                </button>
-              </div>
+              {todaySchedule.map(item => {
+                const start = new Date(item.startDateTime);
+                const dateLabel = start.toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' });
+                const timeLabel = start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const diffMs = Math.max(0, start.getTime() - now.getTime());
+                const totalSeconds = Math.floor(diffMs / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                const pad = (n: number) => n.toString().padStart(2, '0');
+                const countdown = days > 0
+                  ? `${days}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+                  : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                return (
+                  <div key={item.id} className="schedule-item">
+                    <div className="schedule-timebox">
+                      <div className="time time-accent">{timeLabel}</div>
+                      <div className="date">{dateLabel}</div>
+                      <div className="countdown-row">
+                        <span className="countdown-icon">🕒</span>
+                        <span className="countdown-text">{countdown}</span>
+                      </div>
+                    </div>
+                    <div className="schedule-content">
+                      <div className="title-grid">
+                        <div className="title-left">
+                          <span className="dot" style={{ backgroundColor: '#a16207' }}></span>
+                          <h4 className="lesson-name">{item.lessonName}</h4>
+                          <span className="class-type class-type-pill"><Users size={14} /> {item.classType}</span>
+                        </div>
+                        <span className="teacher-inline">
+                          <img className="teacher-avatar" src={item.teacher.avatar} alt={item.teacher.name} />
+                          {item.teacher.name}
+                        </span>
+                        <div className="status-row">
+                          <span className="badge badge-scheduled-soft">Đã lên lịch</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="join-icon-btn" onClick={onJoinClass} aria-label="Tham gia buổi học">
+                      <Video size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -241,6 +241,59 @@
   grid-row: span 2;
 }
 
+/* Overview */
+.overview-wrapper {
+  grid-row: span 2;
+}
+
+.overview-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.overview-card .icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.overview-card.primary .icon-wrap { background: #0057A5; }
+.overview-card.success .icon-wrap { background: #8CC63F; }
+.overview-card.info .icon-wrap { background: #0ea5e9; }
+.overview-card.warning .icon-wrap { background: #DB2691; }
+
+.overview-content .value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.overview-content .label {
+  font-size: 13px;
+  color: #64748b;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -417,18 +470,45 @@
 }
 
 .schedule-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
   align-items: center;
   gap: 16px;
   padding: 16px;
-  border-radius: 8px;
-  background: #f8fafc;
-  transition: background 0.2s ease;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .schedule-item:hover {
-  background: #f1f5f9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
 }
+
+.schedule-timebox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.schedule-timebox .time {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.schedule-timebox .time-accent { color: #ef4444; }
+
+.schedule-timebox .date {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.countdown-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
+.countdown-icon { font-size: 12px; }
+.countdown-text { font-size: 13px; color: #f97316; font-weight: 600; }
 
 .schedule-time {
   font-size: 16px;
@@ -439,6 +519,104 @@
 
 .schedule-content {
   flex: 1;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.title-grid {
+  display: grid;
+  grid-template-columns: 1fr auto; /* left: title + class type, right: teacher */
+  align-items: center;
+  gap: 12px;
+}
+
+.title-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-row .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.lesson-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.status-row { margin-bottom: 6px; }
+
+.badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.badge-scheduled {
+  background: #ecfeff;
+  color: #0e7490;
+  border-color: #a5f3fc;
+}
+
+.badge-scheduled-soft {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.meta-row .class-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.class-type-pill {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.separator { color: #cbd5e1; }
+
+.teacher-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+}
+
+.teacher-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+  font-weight: 500;
 }
 
 .schedule-content h4 {
@@ -469,6 +647,28 @@
   opacity: 0.9;
 }
 
+.join-video {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.join-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #60a5fa;
+  color: #1d4ed8;
+  background: #eff6ff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .dashboard-grid {
@@ -477,6 +677,12 @@
   
   .courses-section {
     grid-row: span 1;
+  }
+  .overview-wrapper {
+    grid-row: span 1;
+  }
+  .overview-grid {
+    grid-template-columns: 1fr;
   }
   
   .courses-list {
@@ -526,9 +732,9 @@
   }
   
   .schedule-item {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    gap: 8px;
+    gap: 12px;
   }
   
   .schedule-time {
